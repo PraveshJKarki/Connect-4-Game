@@ -1,5 +1,5 @@
 # Connect-4-Game
-;Programmer: Pravesh Jung Karki 
+;Programmer: Pravesh Jung Karki                                                                                
 ;Description: Connect 4 is played on a grid of 6 rows by 7 columns.
 ;Two players alternate placing markers on the grid.
 ;Each player is assigned a unique shape or color (like black or red) to distinguish their markers.
