@@ -1,0 +1,300 @@
+;Program 12 ( connect-4 board game)
+;Programmer: Pravesh Jung Karki 
+;Description: Connect 4 is played on a grid of 6 rows by 7 columns.
+;Two players alternate placing markers on the grid.
+;Each player is assigned a unique shape or color (like black or red) to distinguish their markers.
+;Each turn consists of inserting a marker in one of the (unfilled) columns,
+;which causes the next empty row in that column, starting from the bottom row, to receive that marker.
+;In other words, each entry adds one more marker to the stack of markers inthe designated column.
+;The object of the game is to be the first player to "connect four"
+;adjacent markers of the same shape or color, either vertically, horizontally, or diagonally.
+
+;This is the helper function which will
+;return the element of the specified row and a column. 
+ (define ( PJKgetItem rowLst column )
+    (if (null? rowLst)
+        ()
+        (if (= column 1)
+            (car rowLst)
+         ( PJKgetItem (cdr rowLst) (- column 1) )
+         )
+        )
+    )
+
+;It returns the item at the given grid location in a list of lists
+(define ( PJKgetCell Matrix Row Column )
+    (if (null? Matrix)
+        ()
+        (if (= Row 1)
+        ( PJKgetItem (car Matrix) Column )
+        ( PJKgetCell (cdr Matrix)(- Row 1) Column )
+        )
+        )
+
+   )
+
+;This is the helper function which will set the given
+;item to a specified row and a column and return 
+(define ( PJKchangeItem rowLst column item )
+    (if (null? rowLst)
+        ()
+        (if (= column 1 )
+            (cons item (cdr rowLst))
+            (cons (car rowLst) ( PJKchangeItem (cdr rowLst) (- column 1) item ))
+            )
+        )
+    )
+;This function will return a new matrix with the given
+;grid location reset to the given value'Item'
+(define ( PJKsetCell Matrix Row Column Item )
+    (if (null? Matrix)
+        ()
+        (if (= Row 1)
+           (cons ( PJKchangeItem (car Matrix) Column Item ) (cdr Matrix))
+           (cons (car Matrix) ( PJKsetCell (cdr Matrix) (- Row 1) Column Item )
+           )
+        )
+     )
+   )
+
+;A global variable to hold the board of the game.
+(define PJKGame 0)
+
+;a function to start the game, called PJKStartGame, with no arguments, that returns #t.
+(define (PJKStartGame)
+   (begin
+      (set! PJKGame '("1"
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     (" O " " O " " O " " O " " O " " O " " O ")
+                     )
+      )
+(display "    Called CONNECT 4 . \n")
+(display " Here's a great challenge from PJK. \n")
+  #t 
+   )
+)
+;This is the helper function which will take the row
+;and help displaying the board for PJKShowGame
+(define (PJKhelperShow row)
+    (cond ((>= row 1)
+        (display (PJKgetCell (cdr PJKGame) row 1))
+        (display (PJKgetCell (cdr PJKGame) row 2))
+        (display (PJKgetCell (cdr PJKGame) row 3))
+        (display (PJKgetCell (cdr PJKGame) row 4))
+        (display (PJKgetCell (cdr PJKGame) row 5))
+        (display (PJKgetCell (cdr PJKGame)row 6))
+        (display (PJKgetCell (cdr PJKGame) row 7))
+        (newline)
+        (PJKhelperShow (- row 1)))
+     )
+     
+ )
+;a function to make a simple graphical display of the current game grid,
+;called PJKShowGame, that receives no arguments and returns #t.
+(define (PJKShowGame)
+(begin 
+ (display "-------------------------")
+ (newline)
+ (display "C  O  N  N  E  C  T  -  4")
+ (newline)
+ (display "-------------------------")
+ (newline)
+(PJKhelperShow 6)
+ (display "-------------------------")
+(newline)
+ (display "C  O  N  N  E  C  T  -  4")
+ (newline)
+ (display "-------------------------")
+ (newline)
+ (display "N E X T   P L A Y E R ----> : " )
+ (display (car PJKGame))
+ (newline)
+#t ; to return something small and
+; not disruptive to the display
+) 
+)
+
+;This is the helper function that will return the next available row.
+(define (PJKcheckEmptyRow lst1 row column)
+   (if (null? lst1)
+       ()
+       (if (< row 7)
+           (if  (string=? ( PJKgetCell lst1 row column ) " O ") 
+           row
+           (PJKcheckEmptyRow lst1 (+ row 1) column)
+           )
+       0
+       )
+   )
+)
+
+;This is the helper function to check whose turn is it
+;and provide the appopriate turn
+(define (PJKcheckCar)
+(if (string=? (car PJKGame ) "1")
+    "2"
+    "1")
+  )
+
+;This is the helper function to check what
+;goes on a board.
+(define (PJKplayMove)
+(if (string=? (car PJKGame ) "1")
+    " 1 "
+    " 2 ")
+  )
+
+;a function to make a move specified by a player, called PJKMarkMove,
+;given one argument that indicates the column (numbered left to right from 1 to 7), that returns the same column.
+(define (PJKMarkMove Col)
+     (begin
+        (set! PJKGame (cons (PJKcheckCar)
+                            ( PJKsetCell (cdr PJKGame) (PJKcheckEmptyRow (cdr PJKGame) 1 Col) Col ( PJKplayMove) )
+                      )
+        )
+     )
+ Col
+)
+
+;a function, called PJKLegalMoveP to test a given move (column)
+;to see if it's legal with respect to the current game state, and returns true or false (#t/#f). 
+(define (PJKLegalMoveP C)
+    (if (string=? ( PJKgetCell (cdr PJKGame) 6 C ) " O ")
+        #t
+        #f
+    )
+
+)
+
+;A helper function that will check if the given number
+;is legal and if it is it will return that number.
+(define (PJKhelperLegalColumn number )
+   (if (PJKLegalMoveP number)
+        number
+       (PJKhelperLegalColumn (+ 1 (random 7)) )
+    )
+)
+
+;This is the helper function that will call
+;PJKWillWinP and see which column cause a win
+;and return that if there is any or else it will
+;return zero. 
+(define (PJKcallPJKWillWin column)
+    (if (< column 8)
+        (if (PJKWillWinP column)
+        column
+        (PJKcallPJKWillWin (+ column 1))
+        )
+    0
+    )
+)
+
+;a function to ask the program to make a move, called PJKMakeMove,
+;with no arguments, that returns the chosen column for the next move.
+(define (PJKMakeMove)
+    (if (= (PJKcallPJKWillWin 1) 0)
+        (PJKMarkMove (PJKhelperLegalColumn (+ 1 (random 7))))
+        (PJKMarkMove (PJKcallPJKWillWin 1))
+    )
+)
+
+;This is the helper function that will check
+;and return the item from a valid row and column. 
+(define (PJKcallgetCall matrix  row column)
+    (if (or (< row 1) (> row 6) (< column 1) (> column 7))
+           "invalid"
+           ( PJKgetCell (cdr PJKGame) row  column )
+           )
+    )
+
+;This is the helper function that will check all the
+;necessary condition that will cause a win.
+(define (PJKgoDirection matrix row column direction)
+        (if (or (< row 1) (> row 6) (< column 1) (> column 7))
+            0
+            (if (string=? direction "+Xaxis")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column  ) (PJKcallgetCall (cdr matrix)  row (+ column 1))))
+                    0
+                (+ 1 (PJKgoDirection matrix row (+ column 1) direction))
+                )
+             
+            (if (string=? direction "-Xaxis")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column ) (PJKcallgetCall (cdr matrix) row (- column 1))))
+                   0
+                (+ 1 (PJKgoDirection matrix row (- column 1) direction))
+                )
+             
+            (if (string=? direction "-Yaxis")  
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column) (PJKcallgetCall (cdr matrix) (- row 1) column) ))
+                0
+                (+ 1 (PJKgoDirection matrix (- row 1) column  direction))
+                )
+             
+            (if (string=? direction "firstQuadDiagonal")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column  ) ( PJKcallgetCall (cdr matrix) (+ row 1) (+ column 1) )))
+                0
+                (+ 1 (PJKgoDirection matrix (+ row 1) (+ column 1)  direction))
+                )
+             
+            (if (string=? direction "secondQuadDiagonal")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column  ) ( PJKcallgetCall (cdr matrix) (+ row 1) (- column 1) )))
+                0
+                (+ 1 (PJKgoDirection  matrix (+ row 1) (- column 1) direction))
+                )
+            
+            (if (string=? direction "thirdQuadDiagonal")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column  ) ( PJKcallgetCall (cdr matrix) (- row 1) (- column 1) )))
+                0
+                (+ 1 (PJKgoDirection matrix (- row 1) (- column 1)  direction))
+                )
+             
+            (if (string=? direction "forthQuadDiagonal")
+                (if (not (string=? ( PJKgetCell (cdr matrix) row column  ) (PJKcallgetCall (cdr matrix) (- row 1) (+ column 1) )))
+                0
+                (+ 1 (PJKgoDirection matrix (- row 1) (+ column 1)  direction))
+                )
+             ) )))) ))))
+
+
+;This is the helper function that will check
+;all the necessary condition and see if there is a win
+;and return true else return false. 
+(define (PJKwinning matrix row column)
+    (if (or (= (+ (PJKgoDirection matrix row column "+Xaxis") (PJKgoDirection matrix row column "-Xaxis")) 3)
+            (= (+ (PJKgoDirection matrix row column "firstQuadDiagonal")(PJKgoDirection matrix row column "thirdQuadDiagonal")) 3)
+            (= (+ (PJKgoDirection matrix row column "secondQuadDiagonal") (PJKgoDirection matrix row column "forthQuadDiagonal")) 3)
+            (= (PJKgoDirection matrix row column "-Yaxis") 3)
+         )
+            #t
+            #f
+    )
+ )
+
+;a function, called PJKWinP, to test the current game grid to see if the last move resulted in a win;
+;to simplify this task, we accept one argument that represents the column of the latest move, and return true or false.
+(define (PJKWinP column)
+    (if (= (PJKcheckEmptyRow (cdr PJKGame) 1 column) 0)
+           (PJKwinning PJKGame 6 column)
+           (PJKwinning PJKGame (- (PJKcheckEmptyRow (cdr PJKGame) 1 column) 1) column)
+    )
+)
+
+;a function, called PJKWillWinP, to test the current game grid to see
+;if the given move (column) will result in a win, and return true or false.
+(define (PJKWillWinP column)
+    (if (PJKLegalMoveP column) 
+         (if (or (PJKwinning (cons (PJKcheckCar) ( PJKsetCell (cdr PJKGame) (PJKcheckEmptyRow (cdr PJKGame) 1 column) column " 1 " ))
+                      (PJKcheckEmptyRow (cdr PJKGame) 1 column) column)
+                 (PJKwinning (cons (PJKcheckCar) ( PJKsetCell (cdr PJKGame) (PJKcheckEmptyRow (cdr PJKGame) 1 column) column " 2 " ))
+                      (PJKcheckEmptyRow (cdr PJKGame) 1 column) column)
+             )
+        #t
+        #f
+         )
+        #f
+    )
+)
